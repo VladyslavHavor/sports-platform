@@ -9,6 +9,7 @@ const playersRoutes = require("./routes/players");
 const tournamentsRoutes = require("./routes/tournaments");
 const authRoutes = require("./routes/auth");
 const favoritesRoutes = require("./routes/favorites");
+const sportsRoutes = require("./routes/sports");
 
 const app = express();
 
@@ -28,10 +29,11 @@ app.get("/health/db", async (req, res) => {
 
 app.use("/auth", authRoutes);
 app.use("/favorites", favoritesRoutes);
-
 app.use("/matches", matchesRoutes);
 app.use("/players", playersRoutes);
 app.use("/tournaments", tournamentsRoutes);
+app.use("/sports", sportsRoutes);
+
 
 app.use((req, res) => res.status(404).json({ error: "Route not found" }));
 

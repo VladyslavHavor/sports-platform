@@ -1,13 +1,18 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { t } from "../i18n";
 import { useAuth } from "../auth/AuthContext";
 
-export default function Sidebar({ tournaments, selectedId, onSelect }) {
+export default function Sidebar({ tournaments = [], selectedId, onSelect, selectedSportId }) {
   const { lang } = useAuth();
+
+  const filteredTournaments = useMemo(() => {
+    if (!selectedSportId) return tournaments;
+    return tournaments.filter((x) => Number(x.sport_id) === Number(selectedSportId));
+  }, [tournaments, selectedSportId]);
 
   return (
     <div className="sidebar">
-      <div className="sidebarTitle">{t(lang, "allLeagues")}</div>
+      <div className="sidebarTitle">{t(lang, "Tournaments")}</div>
 
       <button
         className={`sideItem ${selectedId === null ? "active" : ""}`}
@@ -17,7 +22,7 @@ export default function Sidebar({ tournaments, selectedId, onSelect }) {
       </button>
 
       <div className="sideList">
-        {tournaments.map((l) => (
+        {filteredTournaments.map((l) => (
           <button
             key={l.tournament_id}
             className={`sideItem ${selectedId === l.tournament_id ? "active" : ""}`}

@@ -294,6 +294,7 @@ tr:hover td{ background: rgba(255,255,255,.04); }
   color: rgba(255,255,255,.92);
   padding: 10px 12px;
   border-radius: 14px;
+  margin-bottom: 16px;
 }
 
 /* ===== Dashboard (HomePage) ===== */
@@ -452,7 +453,7 @@ tr:hover td{ background: rgba(255,255,255,.04); }
   background: rgba(8, 12, 24, .55);
   border-bottom: 1px solid rgba(255,255,255,.08);
   backdrop-filter: blur(10px);
-  
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
 .brandLink{
@@ -588,8 +589,8 @@ tr:hover td{ background: rgba(255,255,255,.04); }
 .topbarLogo{
   width:34px;
   height:34px;
-  border-radius:10px;       /* робить не квадратним */
-  object-fit: cover;        /* норм кадрує */
+  border-radius:10px;      
+  object-fit: cover;       
   box-shadow: 0 10px 24px rgba(0,0,0,.35);
 }
 
@@ -598,4 +599,511 @@ tr:hover td{ background: rgba(255,255,255,.04); }
   letter-spacing: .6px;
   font-size: 16px;
   text-transform: uppercase;
+}
+
+/* Topbar right actions - premium look */
+.topbarActions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.10);
+  backdrop-filter: blur(10px);
+}
+
+.chipBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.92);
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: .2px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .08s ease, background .15s ease, border-color .15s ease, filter .15s ease;
+}
+
+.chipBtn:hover{
+  background: rgba(255,255,255,.10);
+  border-color: rgba(255,255,255,.18);
+}
+
+.chipBtn:active{
+  transform: translateY(1px);
+}
+
+.chipPrimary{
+  border: 0;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  color: #06101a;
+  font-weight: 900;
+  box-shadow: 0 12px 30px rgba(124,58,237,.22);
+}
+
+.chipPrimary:hover{
+  filter: brightness(1.05);
+}
+
+.userBadge{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.92);
+  font-weight: 800;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* Language dropdown */
+.langWrap{ position: relative; }
+
+.langBtn{
+  gap: 8px;
+  padding: 0 10px;
+}
+
+.flag{
+  font-size: 16px;
+  line-height: 1;
+}
+
+.langCode{
+  font-weight: 900;
+  letter-spacing: .6px;
+}
+
+.chev{
+  opacity: .7;
+  transform: translateY(1px);
+  transition: transform .15s ease;
+}
+.chev.up{
+  transform: translateY(1px) rotate(180deg);
+}
+
+.langMenu{
+  position:absolute;
+  right:0;
+  top: 42px;
+  min-width: 120px;
+  padding: 6px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(8,12,22,.85);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 60px rgba(0,0,0,.55);
+  z-index: 999;
+}
+
+.langItem{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding: 10px 10px;
+  border-radius: 12px;
+  border: 0;
+  background: transparent;
+  color: rgba(255,255,255,.92);
+  cursor:pointer;
+  text-align:left;
+}
+
+.langItem:hover{
+  background: rgba(255,255,255,.08);
+}
+
+.langItem.active{
+  background: rgba(34,211,238,.10);
+  outline: 1px solid rgba(34,211,238,.25);
+}
+
+.langBox{ position: relative; }
+
+.langBtn{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  padding:0px 0px;
+}
+
+.flag{ font-size: 16px; line-height: 1; }
+.chev{ opacity: .75; font-size: 12px; margin-left: 2px; }
+
+
+
+.langItem{
+  width:100%;
+  display:grid;
+  grid-template-columns: 22px 42px 1fr;
+  gap:10px;
+  align-items:center;
+  text-align:left;
+  padding:10px 10px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(255,255,255,.92);
+  cursor:pointer;
+}
+
+.langItem:hover{
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.10);
+}
+
+.langItem.active{
+  background: rgba(116, 90, 255, .16);
+  border-color: rgba(116, 90, 255, .28);
+}
+
+.langLabel{
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+
+.langName{
+  opacity: .75;
+  font-size: 12px;
+}
+
+.userChip{
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+}
+
+.btnLogin {
+  padding: 8px 18px;
+  border-radius: 12px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.4);
+  color: #fff;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.btnLogin:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: #a855f7;
+}
+
+.authWrapper {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.authCard {
+  width: 100%;
+  max-width: 520px; /* щоб було як на реєстрації */
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 34px 36px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+}
+
+.authTitle {
+  margin: 0 0 18px;
+  font-size: 40px;
+  font-weight: 700;
+}
+
+.authForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.inputGroup label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.inputGroup input {
+  height: 42px;
+  border-radius: 12px;
+  padding: 0 14px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.92);
+  outline: none;
+}
+
+.inputGroup input:focus {
+  border-color: rgba(168, 85, 247, 0.7);
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.18);
+}
+
+.authActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  align-items: center;
+}
+
+/* Primary (Реєстрація) */
+.btnPrimary {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-weight: 600;
+  background: linear-gradient(135deg, #7c3aed, #22d3ee);
+  transition: 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.btnPrimary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(124, 58, 237, 0.35);
+}
+
+/* Ghost / Secondary (Вхід) */
+.btnGhost {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnGhost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.authError {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 0, 0, 0.12);
+  border: 1px solid rgba(255, 0, 0, 0.25);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 14px;
+}
+
+/* =========================
+   TOPBAR layout
+   ========================= */
+
+/* ===== TOPBAR: залізобетонний layout в 1 ряд ===== */
+/* ===== TOPBAR ===== */
+/* ===== TOPBAR: 1 ряд, нічого не падає вниз ===== */
+.topbar{
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: rgba(8, 12, 24, .55);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.4);
+
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 12px;
+
+  overflow: visible; /* щоб dropdown не обрізався */
+    grid-template-columns: auto minmax(0,1fr) auto !important;
+
+}
+
+.topbarRight{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+    display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex-wrap: nowrap !important;     /* ключ */
+  white-space: nowrap !important;   /* ключ */
+}
+
+/* ===== SPORT TABS (CENTER) ===== */
+.sportTabs{
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center; 
+  gap: 8px;
+
+  overflow-x: auto;
+  white-space: nowrap;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.sportTab{
+  height: 38px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.92);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.sportTab:hover{
+  background: rgba(255,255,255,.07);
+  border-color: rgba(255,255,255,.18);
+}
+.sportTab.active{
+  background: rgba(110,86,255,.26);
+  border-color: rgba(110,86,255,.55);
+}
+
+.sportIcon{ font-size: 15px; line-height: 1; }
+.sportName{ font-size: 15px; font-weight: 700; opacity: .95; }
+
+/* ===== LANGUAGE (STABLE) ===== */
+.langMenu{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  z-index: 10000;
+}
+
+.langBtn{
+  height: 36px;
+  padding: 0 12px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.92);
+
+  cursor: pointer;
+  line-height: 1;
+}
+
+.langBtn.open{
+  border-color: rgba(110, 86, 255, .55);
+  background: rgba(110, 86, 255, .12);
+}
+
+.langChevron{
+  opacity: .75;
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* dropdown завжди під кнопкою справа */
+.langDropdown{
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 10001;
+
+  width: 240px;
+  padding: 8px;
+
+  background: rgba(10,16,30,.92);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 18px 40px rgba(0,0,0,.35);
+}
+
+.langItem{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+
+  background: transparent;
+  color: rgba(255,255,255,.92);
+  cursor: pointer;
+  text-align: left;
+}
+
+.langItem:hover{
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.10);
+}
+
+.langItem.active{
+  background: rgba(110, 86, 255, .22);
+  border-color: rgba(110, 86, 255, .45);
+}
+
+.langCode{
+  width: 34px;
+  font-weight: 800;
+}
+
+.langLabel{
+  opacity: .9;
+}
+
+.langMenu{
+  position: relative !important;
+  display: inline-flex;
+  align-items: center;
+  z-index: 10000;
+}
+/* ===== Simple dark select for language ===== */
+
+.langSelect { 
+  font-weight: 700; /* трохи жирніший */  font-size: 13px; /* розмір тексту */
+}
+.sportIconImg{
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 0 6px rgba(34,211,238,.35));
 }

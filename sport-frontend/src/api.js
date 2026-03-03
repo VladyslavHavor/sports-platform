@@ -4,7 +4,6 @@ export const API = axios.create({
   baseURL: "http://localhost:5000",
 });
 
-
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -12,6 +11,12 @@ API.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// ✅ NEW: sports
+export async function getSports() {
+  const { data } = await API.get("/sports");
+  return data;
+}
 
 // matches with optional filters
 export async function getMatches(params = {}) {
@@ -66,7 +71,7 @@ export async function me() {
 // favorites
 export async function getFavorites() {
   const { data } = await API.get("/favorites");
-  return data; // масив team_id
+  return data;
 }
 
 export async function addFavorite(teamId) {
@@ -78,4 +83,3 @@ export async function removeFavorite(teamId) {
   const { data } = await API.delete(`/favorites/${teamId}`);
   return data;
 }
-

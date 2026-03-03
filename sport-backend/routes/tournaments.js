@@ -6,9 +6,10 @@ const pool = require("../db");
 router.get("/", async (req, res) => {
   try {
     const { rows } = await pool.query(`
-      SELECT tournament_id, name, country
-      FROM tournaments
-      ORDER BY country NULLS LAST, name ASC;
+      SELECT t.tournament_id, t.name, t.country, t.sport_id, s.name AS sport_name
+      FROM tournaments t
+      JOIN sports s ON s.sport_id = t.sport_id
+      ORDER BY s.name ASC, t.country NULLS LAST, t.name ASC;
     `);
     res.json(rows);
   } catch (err) {
@@ -23,45 +24,79 @@ router.get("/:id/standings", async (req, res) => {
 
     const { rows } = await pool.query(
       `
-      WITH match_rows AS (
+      WITH finished_matches AS (
         SELECT
+          m.match_id,
           m.tournament_id,
-          m.home_team_id AS team_id,
-          COALESCE(m.score_home,0)::int AS goals_for,
-          COALESCE(m.score_away,0)::int AS goals_against
+          m.home_team_id,
+          m.away_team_id,
+          COALESCE(m.score_home, 0)::int AS score_home,
+          COALESCE(m.score_away, 0)::int AS score_away
         FROM matches m
-        WHERE m.tournament_id = $1 AND m.status = 'finished'
+        WHERE m.tournament_id = $1
+          AND NOW()::timestamp >= (m.match_date + (m.duration_minutes || ' minutes')::interval)
+      ),
+      match_rows AS (
+        SELECT
+          fm.home_team_id AS team_id,
+          1 AS played,
+          CASE WHEN fm.score_home > fm.score_away THEN 1 ELSE 0 END AS wins,
+          CASE WHEN fm.score_home = fm.score_away THEN 1 ELSE 0 END AS draws,
+          CASE WHEN fm.score_home < fm.score_away THEN 1 ELSE 0 END AS losses,
+          fm.score_home AS goals_for,
+          fm.score_away AS goals_against,
+          CASE
+            WHEN fm.score_home > fm.score_away THEN 3
+            WHEN fm.score_home = fm.score_away THEN 1
+            ELSE 0
+          END AS points
+        FROM finished_matches fm
 
         UNION ALL
 
         SELECT
-          m.tournament_id,
-          m.away_team_id AS team_id,
-          COALESCE(m.score_away,0)::int AS goals_for,
-          COALESCE(m.score_home,0)::int AS goals_against
-        FROM matches m
-        WHERE m.tournament_id = $1 AND m.status = 'finished'
+          fm.away_team_id AS team_id,
+          1 AS played,
+          CASE WHEN fm.score_away > fm.score_home THEN 1 ELSE 0 END AS wins,
+          CASE WHEN fm.score_away = fm.score_home THEN 1 ELSE 0 END AS draws,
+          CASE WHEN fm.score_away < fm.score_home THEN 1 ELSE 0 END AS losses,
+          fm.score_away AS goals_for,
+          fm.score_home AS goals_against,
+          CASE
+            WHEN fm.score_away > fm.score_home THEN 3
+            WHEN fm.score_away = fm.score_home THEN 1
+            ELSE 0
+          END AS points
+        FROM finished_matches fm
+      ),
+      agg AS (
+        SELECT
+          team_id,
+          SUM(played)::int AS played,
+          SUM(wins)::int AS wins,
+          SUM(draws)::int AS draws,
+          SUM(losses)::int AS losses,
+          SUM(goals_for)::int AS goals_for,
+          SUM(goals_against)::int AS goals_against,
+          (SUM(goals_for) - SUM(goals_against))::int AS goal_diff,
+          SUM(points)::int AS points
+        FROM match_rows
+        GROUP BY team_id
       )
       SELECT
-        r.team_id,
+        tm.team_id,
         tm.name AS team_name,
-        COUNT(*)::int AS played,
-        SUM(CASE WHEN r.goals_for > r.goals_against THEN 1 ELSE 0 END)::int AS wins,
-        SUM(CASE WHEN r.goals_for = r.goals_against THEN 1 ELSE 0 END)::int AS draws,
-        SUM(CASE WHEN r.goals_for < r.goals_against THEN 1 ELSE 0 END)::int AS losses,
-        SUM(r.goals_for)::int AS goals_for,
-        SUM(r.goals_against)::int AS goals_against,
-        (SUM(r.goals_for) - SUM(r.goals_against))::int AS goal_diff,
-        (SUM(
-          CASE
-            WHEN r.goals_for > r.goals_against THEN 3
-            WHEN r.goals_for = r.goals_against THEN 1
-            ELSE 0
-          END
-        ))::int AS points
-      FROM match_rows r
-      JOIN teams tm ON tm.team_id = r.team_id
-      GROUP BY r.team_id, tm.name
+        COALESCE(a.played, 0) AS played,
+        COALESCE(a.wins, 0) AS wins,
+        COALESCE(a.draws, 0) AS draws,
+        COALESCE(a.losses, 0) AS losses,
+        COALESCE(a.goals_for, 0) AS goals_for,
+        COALESCE(a.goals_against, 0) AS goals_against,
+        COALESCE(a.goal_diff, 0) AS goal_diff,
+        COALESCE(a.points, 0) AS points
+      FROM teams tm
+      LEFT JOIN agg a ON a.team_id = tm.team_id
+      WHERE tm.tournament_id = $1
       ORDER BY points DESC, goal_diff DESC, goals_for DESC, team_name ASC;
       `,
       [tournamentId]
@@ -74,3 +109,4 @@ router.get("/:id/standings", async (req, res) => {
 });
 
 module.exports = router;
+

@@ -1,20 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getMatches } from "../api";
+import { useAuth } from "../auth/AuthContext";
+import { t } from "../i18n";
 
-export default function MatchesPage({ selectedLeagueId }) {
+export default function MatchesPage({ selectedSportId, selectedLeagueId }) {
+  const { lang } = useAuth();
+
   const [matches, setMatches] = useState([]);
   const [error, setError] = useState("");
 
-  const [status, setStatus] = useState("ALL");
+  const [status, setStatus] = useState("all");
 
   useEffect(() => {
     (async () => {
       try {
         setError("");
         const params = {};
+
         if (selectedLeagueId) params.tournamentId = selectedLeagueId;
-        if (status !== "ALL") params.status = status;
+        else if (selectedSportId) params.sportId = selectedSportId;
+
+        if (status !== "all") params.status = status;
 
         const data = await getMatches(params);
         setMatches(data);
@@ -22,43 +29,43 @@ export default function MatchesPage({ selectedLeagueId }) {
         setError(e?.response?.data?.error || e.message);
       }
     })();
-  }, [selectedLeagueId, status]);
+  }, [selectedLeagueId, selectedSportId, status]);
 
   return (
     <div className="container">
       <div className="pageHead">
         <div>
-          <div className="h1">Matches</div>
-          <div className="muted">All matches. Filter by match status.</div>
+          <div className="h1">{t(lang, "matches")}</div>
+          <div className="muted">{t(lang, "matchesHint")}</div>
         </div>
 
         <Link className="btn" to="/">
-          ← Dashboard
+          ← {t(lang, "dashboard")}
         </Link>
       </div>
 
       {error && <div className="error">{error}</div>}
-      {!error && matches.length === 0 && <p className="muted">Loading...</p>}
+      {!error && matches.length === 0 && <p className="muted">{t(lang, "loading")}</p>}
 
       {matches.length > 0 && (
         <>
           <div className="filtersRow">
             <div className="field" style={{ width: 240 }}>
-              <div className="label">Status</div>
+              <div className="label">{t(lang, "status")}</div>
               <select
                 className="select"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
               >
-                <option value="ALL">All</option>
-                <option value="scheduled">scheduled</option>
-                <option value="live">live</option>
-                <option value="finished">finished</option>
+                <option value="all">{t(lang, "all")}</option>
+                <option value="scheduled">{t(lang, "scheduled")}</option>
+                <option value="live">{t(lang, "live")}</option>
+                <option value="finished">{t(lang, "finished")}</option>
               </select>
             </div>
 
-            <button className="btn" onClick={() => setStatus("ALL")}>
-              Reset
+            <button className="btn" onClick={() => setStatus("all")}>
+              {t(lang, "reset")}
             </button>
           </div>
 
@@ -67,25 +74,25 @@ export default function MatchesPage({ selectedLeagueId }) {
               <div key={m.match_id} className="cardRow">
                 <div className="cardRowMain">
                   <Link className="cardTitle" to={`/matches/${m.match_id}`}>
-                    {m.home_team} <span style={{ opacity: 0.7 }}>vs</span>{" "}
+                    {m.home_team} <span style={{ opacity: 0.7 }}>{t(lang, "vs")}</span>{" "}
                     {m.away_team}
                   </Link>
 
                   <div className="meta">
                     <span>{new Date(m.match_date).toLocaleString()}</span>
                     <span className="dot">•</span>
-                    <span>{m.tournament || "No tournament"}</span>
+                    <span>{m.tournament || t(lang, "noTournament")}</span>
                     <span className="dot">•</span>
                     <span className={`badge ${m.status}`}>
                       <span className="badgeDot" />
-                      {m.status}
+                      {t(lang, m.status)}
                     </span>
 
                     {m.tournament_id ? (
                       <>
                         <span className="dot">•</span>
                         <Link to={`/tournaments/${m.tournament_id}/standings`}>
-                          View standings →
+                          {t(lang, "viewStandings")} →
                         </Link>
                       </>
                     ) : null}

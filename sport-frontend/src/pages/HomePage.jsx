@@ -1,12 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getMatches, getFavorites, addFavorite, removeFavorite } from "../api";
+import { useAuth } from "../auth/AuthContext";
+import { t } from "../i18n";
 
-export default function HomePage({ selectedLeagueId }) {
+export default function HomePage({ selectedSportId, selectedLeagueId }) {
+  const { lang } = useAuth();
   const [matches, setMatches] = useState([]);
   const [error, setError] = useState("");
 
-  const [status, setStatus] = useState("ALL");
+  const [status, setStatus] = useState("all");
 
   const [favorites, setFavorites] = useState(new Set());
   const [favError, setFavError] = useState("");
@@ -17,16 +20,23 @@ export default function HomePage({ selectedLeagueId }) {
         setError("");
 
         const params = {};
+        // якщо вибрана ліга — фільтруємо по лізі
         if (selectedLeagueId) params.tournamentId = selectedLeagueId;
-        if (status !== "ALL") params.status = status;
+        // якщо ліга НЕ вибрана — фільтруємо по спорту
+        else if (selectedSportId) params.sportId = selectedSportId;
+
+        if (status !== "all") params.status = status;
 
         const data = await getMatches(params);
         setMatches(data);
 
-        // якщо користувач залогінений — підтягнемо favorites
+        // favorites
         try {
           const fav = await getFavorites();
-          setFavorites(new Set(fav));
+          const ids = Array.isArray(fav)
+            ? fav.map((x) => (typeof x === "object" ? x.team_id : x))
+            : [];
+          setFavorites(new Set(ids.map((x) => Number(x))));
         } catch {
           setFavorites(new Set());
         }
@@ -34,30 +44,33 @@ export default function HomePage({ selectedLeagueId }) {
         setError(e?.response?.data?.error || e.message);
       }
     })();
-  }, [selectedLeagueId, status]);
+  }, [selectedLeagueId, selectedSportId, status]);
 
   const counts = useMemo(() => {
     const total = matches.length;
     const liveNow = matches.filter((m) => m.status === "live").length;
     const finished = matches.filter((m) => m.status === "finished").length;
+
     const todayStr = new Date().toDateString();
     const today = matches.filter(
       (m) => new Date(m.match_date).toDateString() === todayStr
     ).length;
+
     return { total, liveNow, today, finished };
   }, [matches]);
 
   async function toggleFav(teamId) {
     try {
       setFavError("");
+      const id = Number(teamId);
       const next = new Set(favorites);
 
-      if (next.has(teamId)) {
-        await removeFavorite(teamId);
-        next.delete(teamId);
+      if (next.has(id)) {
+        await removeFavorite(id);
+        next.delete(id);
       } else {
-        await addFavorite(teamId);
-        next.add(teamId);
+        await addFavorite(id);
+        next.add(id);
       }
       setFavorites(next);
     } catch (e) {
@@ -69,46 +82,46 @@ export default function HomePage({ selectedLeagueId }) {
     <div className="container">
       <div className="pageHead">
         <div>
-          <div className="h1">Dashboard</div>
-          <div className="muted">Quick overview. Filter by match status.</div>
+          <div className="h1">{t(lang, "dashboard")}</div>
+          <div className="muted">{t(lang, "dashboardHint")}</div>
         </div>
 
         <Link className="btn" to="/matches">
-          All matches →
+          {t(lang, "allMatches")} →
         </Link>
       </div>
 
       {error && <div className="error">{error}</div>}
       {favError && <div className="error">{favError}</div>}
 
-      {!error && matches.length === 0 && <p className="muted">Loading...</p>}
+      {!error && matches.length === 0 && <p className="muted">{t(lang, "loading")}</p>}
 
       {matches.length > 0 && (
         <>
           <div className="chipsRow">
-            <div className="chip">Total: {counts.total}</div>
-            <div className="chip">Live now: {counts.liveNow}</div>
-            <div className="chip">Today: {counts.today}</div>
-            <div className="chip">Finished: {counts.finished}</div>
+            <div className="chip">{t(lang, "total")}: {counts.total}</div>
+            <div className="chip">{t(lang, "liveNow")}: {counts.liveNow}</div>
+            <div className="chip">{t(lang, "today")}: {counts.today}</div>
+            <div className="chip">{t(lang, "finished")}: {counts.finished}</div>
           </div>
 
           <div className="filtersRow">
             <div className="field" style={{ width: 240 }}>
-              <div className="label">Status</div>
+              <div className="label">{t(lang, "status")}</div>
               <select
                 className="select"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
               >
-                <option value="ALL">All</option>
-                <option value="scheduled">scheduled</option>
-                <option value="live">live</option>
-                <option value="finished">finished</option>
+                <option value="all">{t(lang, "all")}</option>
+                <option value="scheduled">{t(lang, "scheduled")}</option>
+                <option value="live">{t(lang, "live")}</option>
+                <option value="finished">{t(lang, "finished")}</option>
               </select>
             </div>
 
-            <button className="btn" onClick={() => setStatus("ALL")}>
-              Reset
+            <button className="btn" onClick={() => setStatus("all")}>
+              {t(lang, "reset")}
             </button>
           </div>
 
@@ -116,15 +129,7 @@ export default function HomePage({ selectedLeagueId }) {
             {matches.map((m) => (
               <div key={m.match_id} className="matchRow">
                 <div className="cardRowMain">
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: 10,
-                      alignItems: "center",
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    {/* ⭐ home team */}
+                  <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
                     <button
                       className="starBtn"
                       onClick={(e) => {
@@ -132,17 +137,16 @@ export default function HomePage({ selectedLeagueId }) {
                         e.stopPropagation();
                         toggleFav(m.home_team_id);
                       }}
-                      title="Favorite team"
+                      title={t(lang, "favoriteTeam")}
                     >
-                      {favorites.has(m.home_team_id) ? "★" : "☆"}
+                      {favorites.has(Number(m.home_team_id)) ? "★" : "☆"}
                     </button>
 
                     <Link className="cardTitle" to={`/matches/${m.match_id}`}>
-                      {m.home_team} <span style={{ opacity: 0.7 }}>vs</span>{" "}
+                      {m.home_team} <span style={{ opacity: 0.7 }}>{t(lang, "vs")}</span>{" "}
                       {m.away_team}
                     </Link>
 
-                    {/* ⭐ away team */}
                     <button
                       className="starBtn"
                       onClick={(e) => {
@@ -150,27 +154,27 @@ export default function HomePage({ selectedLeagueId }) {
                         e.stopPropagation();
                         toggleFav(m.away_team_id);
                       }}
-                      title="Favorite team"
+                      title={t(lang, "favoriteTeam")}
                     >
-                      {favorites.has(m.away_team_id) ? "★" : "☆"}
+                      {favorites.has(Number(m.away_team_id)) ? "★" : "☆"}
                     </button>
                   </div>
 
                   <div className="meta">
                     <span>{new Date(m.match_date).toLocaleString()}</span>
                     <span className="dot">•</span>
-                    <span>{m.tournament || "No tournament"}</span>
+                    <span>{m.tournament || t(lang, "noTournament")}</span>
                     <span className="dot">•</span>
                     <span className={`badge ${m.status}`}>
                       <span className="badgeDot" />
-                      {m.status}
+                      {t(lang, m.status)}
                     </span>
 
                     {m.tournament_id ? (
                       <>
                         <span className="dot">•</span>
                         <Link to={`/tournaments/${m.tournament_id}/standings`}>
-                          View standings →
+                          {t(lang, "viewStandings")} →
                         </Link>
                       </>
                     ) : null}

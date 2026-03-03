@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import TopBar from "./components/TopBar";
@@ -11,36 +11,70 @@ import StandingsPage from "./pages/StandingsPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 
-import { getTournaments } from "./api";
+import { getTournaments, getSports } from "./api";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 
 function AppShell() {
   const { user } = useAuth();
+
+  const [sports, setSports] = useState([]);
   const [tournaments, setTournaments] = useState([]);
+
+  const [selectedSportId, setSelectedSportId] = useState(null);
   const [selectedLeagueId, setSelectedLeagueId] = useState(null);
 
-  // admin mode тільки якщо адмін
   const [adminMode, setAdminMode] = useState(false);
+  const canAdmin = user?.role === "admin";
 
   useEffect(() => {
     getTournaments().then(setTournaments).catch(() => setTournaments([]));
   }, []);
 
   useEffect(() => {
+  getSports()
+  .then((rows) => {
+    const list = rows || [];
+
+    // Football першим
+    const sorted = [...list].sort((a, b) => {
+      const A = String(a.name).toLowerCase();
+      const B = String(b.name).toLowerCase();
+      if (A === "football") return -1;
+      if (B === "football") return 1;
+      return A.localeCompare(B);
+    });
+
+    setSports(sorted);
+
+    const football = sorted.find((s) => String(s.name).toLowerCase() === "football");
+    setSelectedSportId(football ? football.sport_id : sorted?.[0]?.sport_id ?? null);
+  })
+  .catch(() => setSports([]));
+  }, []);
+
+  useEffect(() => {
     if (user?.role !== "admin") setAdminMode(false);
   }, [user]);
 
-  const canAdmin = user?.role === "admin";
+  function handleSelectSport(id) {
+    setSelectedSportId(id);
+    setSelectedLeagueId(null); // скидаємо лігу при зміні спорту
+  }
 
   return (
     <div className="appLayout">
-      <TopBar />
+      <TopBar
+        sports={sports}
+        selectedSportId={selectedSportId}
+        onSelectSport={handleSelectSport}
+      />
 
       <div className="mainArea">
         <Sidebar
           tournaments={tournaments}
           selectedId={selectedLeagueId}
           onSelect={setSelectedLeagueId}
+          selectedSportId={selectedSportId}
         />
 
         <div className="content">
@@ -58,8 +92,14 @@ function AppShell() {
           )}
 
           <Routes>
-            <Route path="/" element={<HomePage selectedLeagueId={selectedLeagueId} />} />
-            <Route path="/matches" element={<MatchesPage selectedLeagueId={selectedLeagueId} />} />
+            <Route
+              path="/"
+              element={<HomePage selectedSportId={selectedSportId} selectedLeagueId={selectedLeagueId} />}
+            />
+            <Route
+              path="/matches"
+              element={<MatchesPage selectedSportId={selectedSportId} selectedLeagueId={selectedLeagueId} />}
+            />
             <Route path="/matches/:id" element={<MatchEventsPage adminMode={adminMode} />} />
             <Route path="/tournaments/:id/standings" element={<StandingsPage />} />
 
