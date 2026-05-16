@@ -24,18 +24,17 @@ export default function StandingsPage() {
     <div className="container" style={{ paddingTop: 60 }}>
       <div className="header">
         <div className="brand">
-          <span className="dot" />
-          SPORTS PLATFORM
         </div>
 
-        <Link className="btn" to="/matches">
-          ← Back
-        </Link>
+        <Link className="standingsBackBtn" to="/">
+  <span className="backArrow">←</span>
+  <span>Повернутися назад</span>
+</Link>
       </div>
 
       <div className="card">
-        <h1>Tournament Standings</h1>
-        <p className="muted">Table is calculated from match results and events.</p>
+        <h1>Турнірна Таблиця</h1>
+        <p className="muted"> </p>
 
         {error && <div className="error">{error}</div>}
         {!error && standings.length === 0 && <p className="muted">Loading...</p>}

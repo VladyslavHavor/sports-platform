@@ -37,3 +37,47 @@
   }
 }
 
+.bigStandingsBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+  max-width: 860px;
+
+  margin: 18px 0 20px;
+  padding: 18px 22px;
+
+  border: 1px solid rgba(34, 193, 220, 0.45);
+  border-radius: 20px;
+
+  background:
+    radial-gradient(circle at top left, rgba(109, 93, 252, 0.45), transparent 35%),
+    linear-gradient(135deg, rgba(34, 193, 220, 0.22), rgba(109, 93, 252, 0.28));
+
+  color: #ffffff;
+  text-decoration: none;
+
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+  transition: 0.2s ease;
+}
+
+.leagueTableBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 16px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #6d5dfc, #22c1dc);
+  color: white;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 14px;
+  white-space: nowrap;
+  transition: 0.2s ease;
+}
+
+.leagueTableBtn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}

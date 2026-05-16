@@ -34,8 +34,6 @@ function AppShell() {
   getSports()
   .then((rows) => {
     const list = rows || [];
-
-    // Football першим
     const sorted = [...list].sort((a, b) => {
       const A = String(a.name).toLowerCase();
       const B = String(b.name).toLowerCase();

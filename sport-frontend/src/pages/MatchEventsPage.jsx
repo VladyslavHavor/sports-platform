@@ -41,7 +41,7 @@ export default function MatchEventsPage({ adminMode }) {
 
   return (
     <div className="container">
-      <Link to="/matches" className="btn">
+      <Link to="/" className="btn">
         ← Back to matches
       </Link>
 

@@ -20,7 +20,6 @@ export const dict = {
     logout: "Вийти",
     adminTools: "Адмін",
     addEvent: "Додати подію",
-
     // dashboard text
     
     quickOverview: "Короткий огляд. Фільтр за лігою та статусом матчу.",
