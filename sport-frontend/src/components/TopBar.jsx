@@ -23,6 +23,7 @@ export default function TopBar({ sports = [], selectedSportId, onSelectSport }) 
   if (n === "esports") return esportsIcon;
   if (n === "tennis") return tennisIcon;
 
+
   return footballIcon;
 }
 
@@ -55,7 +56,9 @@ export default function TopBar({ sports = [], selectedSportId, onSelectSport }) 
               alt={s.name}
               className="sportIconImg"
               />                
-              <span className="sportName">{s.name}</span>
+              <span className="sportName">
+  {t(lang, s.name.toLowerCase()) || s.name}
+</span>
               </button>
             );
           })}

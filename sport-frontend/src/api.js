@@ -44,8 +44,10 @@ export async function getPlayersByMatch(id) {
   return data;
 }
 
-export async function getStandings(id) {
-  const { data } = await API.get(`/tournaments/${id}/standings`);
+export async function getStandings(id, season = 2024) {
+  const { data } = await API.get(`/tournaments/${id}/standings`, {
+    params: { season },
+  });
   return data;
 }
 

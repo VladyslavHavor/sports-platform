@@ -2,25 +2,32 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db");
 
-// GET /tournaments  -> list leagues
+// GET /tournaments
 router.get("/", async (req, res) => {
   try {
     const { rows } = await pool.query(`
-      SELECT t.tournament_id, t.name, t.country, t.sport_id, s.name AS sport_name
+      SELECT
+        t.tournament_id,
+        t.name,
+        t.country,
+        t.sport_id,
+        s.name AS sport_name
       FROM tournaments t
       JOIN sports s ON s.sport_id = t.sport_id
       ORDER BY s.name ASC, t.country NULLS LAST, t.name ASC;
     `);
+
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// GET /tournaments/:id/standings
+// GET /tournaments/:id/standings?season=2024
 router.get("/:id/standings", async (req, res) => {
   try {
     const tournamentId = Number(req.params.id);
+    const season = Number(req.query.season || 2024);
 
     const { rows } = await pool.query(
       `
@@ -31,11 +38,15 @@ router.get("/:id/standings", async (req, res) => {
           m.home_team_id,
           m.away_team_id,
           COALESCE(m.score_home, 0)::int AS score_home,
-          COALESCE(m.score_away, 0)::int AS score_away
+          COALESCE(m.score_away, 0)::int AS score_away,
+          m.match_date
         FROM matches m
         WHERE m.tournament_id = $1
-          AND NOW()::timestamp >= (m.match_date + (m.duration_minutes || ' minutes')::interval)
+          AND m.season = $2
+          AND m.score_home IS NOT NULL
+          AND m.score_away IS NOT NULL
       ),
+
       match_rows AS (
         SELECT
           fm.home_team_id AS team_id,
@@ -69,6 +80,7 @@ router.get("/:id/standings", async (req, res) => {
           END AS points
         FROM finished_matches fm
       ),
+
       agg AS (
         SELECT
           team_id,
@@ -82,10 +94,22 @@ router.get("/:id/standings", async (req, res) => {
           SUM(points)::int AS points
         FROM match_rows
         GROUP BY team_id
+      ),
+
+      season_teams AS (
+        SELECT DISTINCT home_team_id AS team_id
+        FROM finished_matches
+
+        UNION
+
+        SELECT DISTINCT away_team_id AS team_id
+        FROM finished_matches
       )
+
       SELECT
         tm.team_id,
         tm.name AS team_name,
+
         COALESCE(a.played, 0) AS played,
         COALESCE(a.wins, 0) AS wins,
         COALESCE(a.draws, 0) AS draws,
@@ -94,12 +118,24 @@ router.get("/:id/standings", async (req, res) => {
         COALESCE(a.goals_against, 0) AS goals_against,
         COALESCE(a.goal_diff, 0) AS goal_diff,
         COALESCE(a.points, 0) AS points
-      FROM teams tm
+
+      FROM season_teams st
+      JOIN teams tm ON tm.team_id = st.team_id
       LEFT JOIN agg a ON a.team_id = tm.team_id
-      WHERE tm.tournament_id = $1
-      ORDER BY points DESC, goal_diff DESC, goals_for DESC, team_name ASC;
+
+      WHERE
+        CASE
+          WHEN tm.sport_id = 1 THEN COALESCE(a.played, 0) >= 5
+          ELSE COALESCE(a.played, 0) > 0
+        END
+
+      ORDER BY
+        points DESC,
+        goal_diff DESC,
+        goals_for DESC,
+        team_name ASC;
       `,
-      [tournamentId]
+      [tournamentId, season]
     );
 
     res.json(rows);
@@ -109,4 +145,3 @@ router.get("/:id/standings", async (req, res) => {
 });
 
 module.exports = router;
-

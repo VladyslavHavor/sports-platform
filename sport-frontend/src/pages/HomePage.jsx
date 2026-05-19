@@ -9,6 +9,7 @@ import {
 } from "../api";
 import { useAuth } from "../auth/AuthContext";
 import { t } from "../i18n";
+import { teamName } from "../teamTranslations";
 
 export default function HomePage({ selectedSportId, selectedLeagueId }) {
   const { lang, user } = useAuth();
@@ -22,7 +23,7 @@ export default function HomePage({ selectedSportId, selectedLeagueId }) {
 
   const [status, setStatus] = useState("all");
   const [onlyFavorites, setOnlyFavorites] = useState(false);
-
+const [search, setSearch] = useState("");
   const [favorites, setFavorites] = useState(new Set());
   const [favError, setFavError] = useState("");
 
@@ -76,14 +77,38 @@ export default function HomePage({ selectedSportId, selectedLeagueId }) {
   }, [selectedMatch]);
 
   const filteredMatches = useMemo(() => {
-    if (!onlyFavorites) return matches;
+  let result = matches;
 
-    return matches.filter(
+  if (onlyFavorites) {
+    result = result.filter(
       (m) =>
         favorites.has(Number(m.home_team_id)) ||
         favorites.has(Number(m.away_team_id))
     );
-  }, [matches, favorites, onlyFavorites]);
+  }
+
+  const q = search.trim().toLowerCase();
+
+  if (q) {
+    result = result.filter((m) => {
+const home = String(m.home_team || "").toLowerCase();
+const away = String(m.away_team || "").toLowerCase();
+const tournament = String(m.tournament || "").toLowerCase();
+
+const homeUa = teamName(m.home_team, "ua").toLowerCase();
+const awayUa = teamName(m.away_team, "ua").toLowerCase();
+return (
+  home.includes(q) ||
+  away.includes(q) ||
+  tournament.includes(q) ||
+  homeUa.includes(q) ||
+  awayUa.includes(q)
+);
+    });
+  }
+
+  return result;
+}, [matches, favorites, onlyFavorites, search]);
 
   const selectedLeagueName =
     selectedLeagueId && matches.length > 0
@@ -143,8 +168,6 @@ export default function HomePage({ selectedSportId, selectedLeagueId }) {
     <div className="container">
       <div className="pageHead">
         <div>
-          <div className="h1">{t(lang, "dashboard")}</div>
-          <div className="muted">{t(lang, "dashboardHint")}</div>
         </div>
 
 
@@ -178,7 +201,19 @@ export default function HomePage({ selectedSportId, selectedLeagueId }) {
             <div className="chip">{t(lang, "today")}: {counts.today}</div>
             <div className="chip">{t(lang, "finished")}: {counts.finished}</div>
           </div>
+<div className="searchRow">
+  <input
+    className="searchInput"
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+placeholder={t(lang, "searchPlaceholder")}  />
 
+  {search && (
+    <button className="btn" onClick={() => setSearch("")}>
+      Очистити
+    </button>
+  )}
+</div>
           <div className="filtersRow">
            <div className="statusTabs">
   <button
@@ -247,7 +282,11 @@ export default function HomePage({ selectedSportId, selectedLeagueId }) {
               {onlyFavorites && filteredMatches.length === 0 && (
                 <p className="muted">Немає матчів за участю улюблених команд.</p>
               )}
-
+{!onlyFavorites && search && filteredMatches.length === 0 && (
+  <p className="muted">
+    Нічого не знайдено за запитом “{search}”.
+  </p>
+)}
               <div className="list">
                 {filteredMatches.map((m) => {
                   const active =
@@ -283,9 +322,9 @@ export default function HomePage({ selectedSportId, selectedLeagueId }) {
                           </button>
 
                           <span className="cardTitle">
-                            {m.home_team}{" "}
+                           {teamName(m.home_team, lang)}{" "}
                             <span style={{ opacity: 0.7 }}>{t(lang, "vs")}</span>{" "}
-                            {m.away_team}
+                            {teamName(m.away_team, lang)}
                           </span>
 
                           <button
@@ -314,7 +353,7 @@ export default function HomePage({ selectedSportId, selectedLeagueId }) {
                       </div>
 
                       <div className="scoreBubble">
-                        {m.score_home ?? "-"} : {m.score_away ?? "-"}
+                        {m.score_home == null ? "-" : m.score_home} : {m.score_away == null ? "-" : m.score_away}
                       </div>
                     </div>
                   );
@@ -328,19 +367,25 @@ export default function HomePage({ selectedSportId, selectedLeagueId }) {
                   ×
                 </button>
 
-                <div className="detailsLeague">
-                  {selectedMatch.tournament || "Tournament"}
-                </div>
+                        <div className="detailsLeague">
+  {selectedMatch.tournament || "Tournament"}
+  {selectedMatch.season ? (
+    <span style={{ opacity: 0.7, marginLeft: 8 }}>
+      • {selectedMatch.season}/{Number(selectedMatch.season) + 1}
+    </span>
+  ) : null}
+</div>
 
                 <div className="detailsTeams">
-                  <div className="detailsTeam">{selectedMatch.home_team}</div>
+                  <div className="detailsTeam">{teamName(selectedMatch.home_team, lang)}</div>
 
-                  <div className="detailsScore">
-                    {selectedMatch.score_home ?? "-"} :{" "}
-                    {selectedMatch.score_away ?? "-"}
-                  </div>
+                 <div className="detailsScore">
+  {selectedMatch.score_home == null ? "-" : selectedMatch.score_home}
+  {" : "}
+  {selectedMatch.score_away == null ? "-" : selectedMatch.score_away}
+</div>
 
-                  <div className="detailsTeam">{selectedMatch.away_team}</div>
+                  <div className="detailsTeam">{teamName(selectedMatch.away_team, lang)}</div>
                 </div>
 
                 <div className="detailsMeta">

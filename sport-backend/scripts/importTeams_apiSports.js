@@ -53,17 +53,17 @@ async function importTeamsForLeague({ apiLeagueId, season, tournamentId, label }
     // ⚠️ у тебе унікальний constraint скоріш за все teams_sport_name_unique (sport_id, name)
     // тому робимо ON CONFLICT саме по ньому
     const q = `
-      INSERT INTO teams (sport_id, name, country, logo, source, external_id, tournament_id)
-      VALUES (1, $1, $2, $3, 'api_sports', $4, $5)
-      ON CONFLICT ON CONSTRAINT teams_sport_name_unique
-      DO UPDATE SET
-        country = COALESCE(EXCLUDED.country, teams.country),
-        logo = COALESCE(EXCLUDED.logo, teams.logo),
-        source = EXCLUDED.source,
-        external_id = EXCLUDED.external_id,
-        tournament_id = EXCLUDED.tournament_id
-      RETURNING team_id;
-    `;
+  INSERT INTO teams (sport_id, name, country, logo, source, external_id, tournament_id)
+  VALUES (1, $1, $2, $3, 'api_sports', $4, $5)
+  ON CONFLICT ON CONSTRAINT teams_sport_name_unique
+  DO UPDATE SET
+    country = COALESCE(EXCLUDED.country, teams.country),
+    logo = COALESCE(EXCLUDED.logo, teams.logo),
+    source = EXCLUDED.source,
+    external_id = EXCLUDED.external_id,
+    tournament_id = EXCLUDED.tournament_id
+  RETURNING team_id;
+`;
 
     await pool.query(q, [name, country, logo, externalId, tournamentId]);
     upserted++;
@@ -78,13 +78,9 @@ async function run() {
   console.log("BASE:", getBaseUrl());
   console.log("KEY exists:", Boolean(getApiKey()));
 
-  const season = Number(process.env.API_SPORTS_SEASON || 2024);
+const seasons = [2023, 2024];
 
 
-  // ✅ API league ids (звичайні для API-Football):
-  // EPL=39, LaLiga=140, SerieA=135, Bundesliga=78, Ligue1=61
-  // ⚠️ UPL треба знайти через /leagues?country=Ukraine — бо у тебе 218 виявився Австрією.
-  // Я поставлю поки null, ти заміниш.
   const configs = [
     { label: "Premier League", apiLeagueId: 39, tournamentId: 5 },
     { label: "La Liga", apiLeagueId: 140, tournamentId: 4 },
@@ -94,10 +90,14 @@ async function run() {
      { label: "Ukrainian Premier League", apiLeagueId: 333, tournamentId: 9 },
   ];
 
+ for (const season of seasons) {
+  console.log(`\n========== SEASON ${season} ==========`);
+
   for (const cfg of configs) {
     await importTeamsForLeague({ ...cfg, season });
-    await sleep(900);
+    await sleep(8000);
   }
+}
 
   console.log("\n✅ DONE");
 }

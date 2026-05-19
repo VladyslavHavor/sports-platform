@@ -18,12 +18,13 @@ export default function Sidebar({
     return tournaments.filter((x) => Number(x.sport_id) === Number(selectedSportId));
   }, [tournaments, selectedSportId]);
 
-  const isStandingsPage = location.pathname.includes("/tournaments/");
-
+const shouldNavigateToMatches =
+  location.pathname.includes("/tournaments/") ||
+  location.pathname.includes("/matches/");
   function handleAllLeagues() {
     onSelect(null);
 
-    if (isStandingsPage) {
+  if (shouldNavigateToMatches) {
       navigate("/");
     }
   }
@@ -31,7 +32,7 @@ export default function Sidebar({
   function handleLeagueClick(id) {
     onSelect(id);
 
-    if (isStandingsPage) {
+if (shouldNavigateToMatches) {
       navigate("/");
     }
   }

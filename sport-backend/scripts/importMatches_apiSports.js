@@ -11,7 +11,7 @@ function mustEnv(name) {
 
 const BASE = (process.env.API_FOOTBALL_BASE || process.env.API_SPORTS_BASE || "").replace(/\/+$/, "");
 const KEY = process.env.API_SPORTS_KEY;
-const SOURCE = "api_sports"; // фіксуємо щоб не було сюрпризів
+const SOURCE = "api_sports";
 
 const api = axios.create({
   baseURL: BASE,
@@ -20,16 +20,9 @@ const api = axios.create({
 });
 
 async function ensureIndexes() {
-  // matches ON CONFLICT (source, external_id) -> потрібен unique index
   await pool.query(`
     CREATE UNIQUE INDEX IF NOT EXISTS matches_source_external_unique
     ON matches (source, external_id);
-  `);
-
-  // (опційно, але корисно) щоб teams не дублювались по API id
-  await pool.query(`
-    CREATE UNIQUE INDEX IF NOT EXISTS teams_source_external_unique
-    ON teams (source, external_id);
   `);
 }
 
@@ -37,7 +30,9 @@ async function importFixtures({ league, season, tournamentId, durationMinutes = 
   const { data } = await api.get("/fixtures", { params: { league, season } });
   const fixtures = Array.isArray(data?.response) ? data.response : [];
 
-  console.log(`Fixtures received: ${fixtures.length} (league=${league}, season=${season}, tournamentId=${tournamentId})`);
+  console.log(
+    `Fixtures received: ${fixtures.length} (league=${league}, season=${season}, tournamentId=${tournamentId})`
+  );
 
   let inserted = 0;
   let skippedNoTeams = 0;
@@ -56,11 +51,11 @@ async function importFixtures({ league, season, tournamentId, durationMinutes = 
       continue;
     }
 
-    // шукаємо team_id саме в цій лізі (tournamentId)
     const homeRes = await pool.query(
       `SELECT team_id FROM teams WHERE source=$1 AND external_id=$2 AND tournament_id=$3`,
       [SOURCE, homeExternal, tournamentId]
     );
+
     const awayRes = await pool.query(
       `SELECT team_id FROM teams WHERE source=$1 AND external_id=$2 AND tournament_id=$3`,
       [SOURCE, awayExternal, tournamentId]
@@ -71,7 +66,6 @@ async function importFixtures({ league, season, tournamentId, durationMinutes = 
       continue;
     }
 
-    // рахунок з API (може бути null)
     const scoreHome = Number.isInteger(f?.goals?.home) ? f.goals.home : null;
     const scoreAway = Number.isInteger(f?.goals?.away) ? f.goals.away : null;
 
@@ -79,9 +73,19 @@ async function importFixtures({ league, season, tournamentId, durationMinutes = 
       await pool.query(
         `
         INSERT INTO matches
-          (match_date, home_team_id, away_team_id, tournament_id, duration_minutes,
-           score_home, score_away, source, external_id)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+          (
+            match_date,
+            home_team_id,
+            away_team_id,
+            tournament_id,
+            duration_minutes,
+            score_home,
+            score_away,
+            source,
+            external_id,
+            season
+          )
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
         ON CONFLICT (source, external_id)
         DO UPDATE SET
           match_date = EXCLUDED.match_date,
@@ -90,7 +94,8 @@ async function importFixtures({ league, season, tournamentId, durationMinutes = 
           tournament_id = EXCLUDED.tournament_id,
           duration_minutes = EXCLUDED.duration_minutes,
           score_home = EXCLUDED.score_home,
-          score_away = EXCLUDED.score_away
+          score_away = EXCLUDED.score_away,
+          season = EXCLUDED.season
         `,
         [
           matchDate,
@@ -102,12 +107,13 @@ async function importFixtures({ league, season, tournamentId, durationMinutes = 
           scoreAway,
           SOURCE,
           fixtureId,
+          season,
         ]
       );
+
       inserted++;
     } catch (e) {
       errors++;
-      // покажемо першу помилку нормально
       console.log("❌ DB error:", e.message);
       console.log("fixtureId:", fixtureId, "home:", homeExternal, "away:", awayExternal);
     }
@@ -128,14 +134,29 @@ async function importFixtures({ league, season, tournamentId, durationMinutes = 
 
     await ensureIndexes();
 
-    // ✅ EPL (Premier League)
-    await importFixtures({
-      league: 39,
-      season: 2024,
-      tournamentId: 5,
-      durationMinutes: 90,
-    });
+    const jobs = [
+      { label: "Premier League", league: 39, seasons: [2023, 2024], tournamentId: 5 },
+      { label: "La Liga", league: 140, seasons: [2023, 2024], tournamentId: 4 },
+      { label: "Serie A", league: 135, seasons: [2023, 2024], tournamentId: 6 },
+      { label: "Bundesliga", league: 78, seasons: [2023, 2024], tournamentId: 7 },
+      { label: "Ligue 1", league: 61, seasons: [2023, 2024], tournamentId: 8 },
+      { label: "Ukrainian Premier League", league: 333, seasons: [2023, 2024], tournamentId: 9 },
+    ];
 
+    for (const job of jobs) {
+      for (const season of job.seasons) {
+        console.log(`\n=== ${job.label} ${season} ===`);
+
+        await importFixtures({
+          league: job.league,
+          season,
+          tournamentId: job.tournamentId,
+          durationMinutes: 90,
+        });
+
+        await new Promise((r) => setTimeout(r, 8000));
+      }
+    }
 
     console.log("✅ Done");
     process.exit(0);

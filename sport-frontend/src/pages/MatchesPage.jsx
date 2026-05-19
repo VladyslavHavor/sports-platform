@@ -269,9 +269,14 @@ export default function MatchesPage({ selectedSportId, selectedLeagueId }) {
                   ×
                 </button>
 
-                <div className="detailsLeague">
-                  {selectedMatch.tournament || "Tournament"}
-                </div>
+               <div className="detailsLeague">
+  {selectedMatch.tournament || "Tournament"}
+  {selectedMatch.season ? (
+    <span style={{ opacity: 0.7, marginLeft: 8 }}>
+      • {selectedMatch.season}/{Number(selectedMatch.season) + 1}
+    </span>
+  ) : null}
+</div>
 
                 <div className="detailsTeams">
                   <div className="detailsTeam">{selectedMatch.home_team}</div>

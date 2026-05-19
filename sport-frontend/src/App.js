@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 
 import TopBar from "./components/TopBar";
 import Sidebar from "./components/Sidebar";
@@ -16,7 +16,7 @@ import { AuthProvider, useAuth } from "./auth/AuthContext";
 
 function AppShell() {
   const { user } = useAuth();
-
+const navigate = useNavigate();
   const [sports, setSports] = useState([]);
   const [tournaments, setTournaments] = useState([]);
 
@@ -54,11 +54,15 @@ function AppShell() {
     if (user?.role !== "admin") setAdminMode(false);
   }, [user]);
 
-  function handleSelectSport(id) {
-    setSelectedSportId(id);
-    setSelectedLeagueId(null); // скидаємо лігу при зміні спорту
-  }
-
+function handleSelectSport(id) {
+  setSelectedSportId(id);
+  setSelectedLeagueId(null);
+  navigate("/");
+}
+function handleSelectLeague(id) {
+  setSelectedLeagueId(id);
+  navigate("/");
+}
   return (
     <div className="appLayout">
       <TopBar
@@ -99,7 +103,10 @@ function AppShell() {
               element={<MatchesPage selectedSportId={selectedSportId} selectedLeagueId={selectedLeagueId} />}
             />
             <Route path="/matches/:id" element={<MatchEventsPage adminMode={adminMode} />} />
-            <Route path="/tournaments/:id/standings" element={<StandingsPage />} />
+            <Route
+  path="/tournaments/:id/standings"
+  element={<StandingsPage tournaments={tournaments} />}
+/>
 
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -119,3 +126,4 @@ export default function App() {
     </AuthProvider>
   );
 }
+
