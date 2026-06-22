@@ -85,3 +85,11 @@ export async function removeFavorite(teamId) {
   const { data } = await API.delete(`/favorites/${teamId}`);
   return data;
 }
+export async function updateMatch(id, payload) {
+  const { data } = await API.put(`/matches/${id}`, payload);
+  return data;
+}
+export async function getTeam(id) {
+  const { data } = await API.get(`/teams/${id}`);
+  return data;
+}

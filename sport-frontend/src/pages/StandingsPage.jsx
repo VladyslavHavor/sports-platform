@@ -133,8 +133,14 @@ const { lang } = useAuth();
                 {standings.map((team, index) => (
                   <tr key={team.team_id}>
                     <td>{index + 1}</td>
-                    <td style={{ fontWeight: 800 }}>{teamName(team.team_name, lang)}</td>
-                    <td>{team.played}</td>
+<td style={{ fontWeight: 800 }}>
+  <Link
+    to={`/teams/${team.team_id}`}
+    className="standingsTeamLink"
+  >
+    {teamName(team.team_name, lang)}
+  </Link>
+</td>                    <td>{team.played}</td>
                     <td>{team.wins}</td>
                     {columns.showDraws && <td>{team.draws}</td>}
                     <td>{team.losses}</td>

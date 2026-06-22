@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../db");
+const auth = require("../middleware/auth");
+const admin = require("../middleware/admin");
 
 const STATUS_CASE_SQL = `
   CASE
@@ -10,12 +12,28 @@ const STATUS_CASE_SQL = `
   END
 `;
 
+function scoreSql(teamSide) {
+  const teamColumn = teamSide === "home" ? "home_team_id" : "away_team_id";
+  const scoreColumn = teamSide === "home" ? "score_home" : "score_away";
+
+  return `
+    CASE
+      WHEN b.status = 'scheduled' THEN NULL
+      ELSE COALESCE(
+        NULLIF(SUM(CASE WHEN e.type='goal' AND p.team_id=b.${teamColumn} THEN 1 ELSE 0 END), 0),
+        b.${scoreColumn},
+        0
+      )::int
+    END AS ${scoreColumn}
+  `;
+}
+
 router.get("/", async (req, res) => {
   try {
     const tournamentId = req.query.tournamentId ? Number(req.query.tournamentId) : null;
     const status = req.query.status ? String(req.query.status) : null;
     const sportId = req.query.sportId ? Number(req.query.sportId) : null;
-
+    const season = req.query.season ? Number(req.query.season) : null;
     const { rows } = await pool.query(
       `
       WITH base AS (
@@ -40,9 +58,10 @@ router.get("/", async (req, res) => {
         JOIN teams th ON th.team_id = m.home_team_id
         JOIN teams ta ON ta.team_id = m.away_team_id
         LEFT JOIN tournaments t ON t.tournament_id = m.tournament_id
-        WHERE
-          ($1::int IS NULL OR m.tournament_id = $1)
-          AND ($3::int IS NULL OR t.sport_id = $3)
+       WHERE
+  ($1::int IS NULL OR m.tournament_id = $1)
+  AND ($3::int IS NULL OR t.sport_id = $3)
+  AND ($4::int IS NULL OR m.season = $4)
       )
 
       SELECT
@@ -60,23 +79,8 @@ router.get("/", async (req, res) => {
         b.tournament,
         b.sport_id,
 
-       CASE
-  WHEN b.status = 'scheduled' THEN NULL
-  ELSE COALESCE(
-    NULLIF(SUM(CASE WHEN e.type='goal' AND p.team_id=b.home_team_id THEN 1 ELSE 0 END), 0),
-    b.score_home,
-    0
-  )::int
-END AS score_home,
-
-       CASE
-  WHEN b.status = 'scheduled' THEN NULL
-  ELSE COALESCE(
-    NULLIF(SUM(CASE WHEN e.type='goal' AND p.team_id=b.away_team_id THEN 1 ELSE 0 END), 0),
-    b.score_away,
-    0
-  )::int
-END AS score_away
+        ${scoreSql("home")},
+        ${scoreSql("away")}
 
       FROM base b
       LEFT JOIN events e ON e.match_id = b.match_id
@@ -101,7 +105,7 @@ END AS score_away
         b.sport_id
       ORDER BY b.match_date DESC;
       `,
-      [tournamentId, status, sportId]
+      [tournamentId, status, sportId, season]
     );
 
     res.json(rows);
@@ -132,23 +136,23 @@ router.get("/:id", async (req, res) => {
         t.name AS tournament,
         t.sport_id,
 
-       CASE
-  WHEN ${STATUS_CASE_SQL} = 'scheduled' THEN NULL
-  ELSE COALESCE(
-    NULLIF(SUM(CASE WHEN e.type='goal' AND p.team_id = m.home_team_id THEN 1 ELSE 0 END), 0),
-    m.score_home,
-    0
-  )::int
-END AS score_home,
+        CASE
+          WHEN ${STATUS_CASE_SQL} = 'scheduled' THEN NULL
+          ELSE COALESCE(
+            NULLIF(SUM(CASE WHEN e.type='goal' AND p.team_id = m.home_team_id THEN 1 ELSE 0 END), 0),
+            m.score_home,
+            0
+          )::int
+        END AS score_home,
 
-      CASE
-  WHEN ${STATUS_CASE_SQL} = 'scheduled' THEN NULL
-  ELSE COALESCE(
-    NULLIF(SUM(CASE WHEN e.type='goal' AND p.team_id = m.away_team_id THEN 1 ELSE 0 END), 0),
-    m.score_away,
-    0
-  )::int
-END AS score_away
+        CASE
+          WHEN ${STATUS_CASE_SQL} = 'scheduled' THEN NULL
+          ELSE COALESCE(
+            NULLIF(SUM(CASE WHEN e.type='goal' AND p.team_id = m.away_team_id THEN 1 ELSE 0 END), 0),
+            m.score_away,
+            0
+          )::int
+        END AS score_away
 
       FROM matches m
       JOIN teams th ON th.team_id = m.home_team_id
@@ -215,13 +219,15 @@ router.get("/:id/events", async (req, res) => {
   }
 });
 
-router.post("/:id/events", async (req, res) => {
+router.post("/:id/events", auth, admin, async (req, res) => {
   try {
     const matchId = Number(req.params.id);
-    const { player_id, minute, type } = req.body || {};
+    const { minute, type, team } = req.body || {};
 
-    if (!player_id || minute == null || !type) {
-      return res.status(400).json({ error: "player_id, minute and type are required." });
+    if (minute == null || !type || !team) {
+      return res.status(400).json({
+        error: "minute, type and team are required.",
+      });
     }
 
     const allowed = new Set(["goal", "assist", "yellow_card", "red_card"]);
@@ -232,9 +238,15 @@ router.post("/:id/events", async (req, res) => {
 
     const matchRes = await pool.query(
       `
-      SELECT match_date, duration_minutes, home_team_id, away_team_id
-      FROM matches
-      WHERE match_id = $1
+      SELECT 
+  m.home_team_id,
+  m.away_team_id,
+  th.name AS home_team,
+  ta.name AS away_team
+FROM matches m
+JOIN teams th ON th.team_id = m.home_team_id
+JOIN teams ta ON ta.team_id = m.away_team_id
+WHERE m.match_id = $1
       `,
       [matchId]
     );
@@ -245,31 +257,29 @@ router.post("/:id/events", async (req, res) => {
 
     const match = matchRes.rows[0];
 
-    const now = new Date();
-    const start = new Date(match.match_date);
-    const end = new Date(start.getTime() + Number(match.duration_minutes || 0) * 60000);
+    const teamId =
+      team === "home"
+        ? match.home_team_id
+        : team === "away"
+        ? match.away_team_id
+        : null;
 
-    if (now < start) {
-      return res.status(400).json({ error: "Match not started yet." });
+    if (!teamId) {
+      return res.status(400).json({ error: "Invalid team." });
     }
 
-    if (now > end) {
-      return res.status(400).json({ error: "Match already ended." });
-    }
+    const demoName = team === "home" ? "Home Team" : "Away Team";
 
-    const playerCheck = await pool.query(
+    const playerRes = await pool.query(
       `
-      SELECT 1
-      FROM players
-      WHERE player_id = $1
-        AND team_id IN ($2, $3)
+      INSERT INTO players (team_id, full_name, sport_id, source)
+      VALUES ($1, $2, 1, 'demo')
+      RETURNING player_id, full_name, team_id;
       `,
-      [Number(player_id), match.home_team_id, match.away_team_id]
+      [teamId, demoName]
     );
 
-    if (playerCheck.rows.length === 0) {
-      return res.status(400).json({ error: "Player does not belong to this match teams." });
-    }
+    const player = playerRes.rows[0];
 
     const ins = await pool.query(
       `
@@ -277,10 +287,69 @@ router.post("/:id/events", async (req, res) => {
       VALUES ($1, $2, $3, $4)
       RETURNING *;
       `,
-      [matchId, Number(player_id), Number(minute), type]
+      [matchId, player.player_id, Number(minute), type]
     );
 
-    res.status(201).json(ins.rows[0]);
+    if (type === "goal") {
+      const scoreColumn = team === "home" ? "score_home" : "score_away";
+
+      await pool.query(
+        `
+        UPDATE matches
+        SET ${scoreColumn} = COALESCE(${scoreColumn}, 0) + 1
+        WHERE match_id = $1;
+        `,
+        [matchId]
+      );
+    }
+
+    res.status(201).json({
+      ...ins.rows[0],
+      full_name:
+        type === "goal"
+          ? "Гол"
+          : type === "yellow_card"
+          ? "Жовта картка"
+          : type === "red_card"
+          ? "Червона картка"
+          : "Подія",
+      team_name: demoName,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put("/:id", auth, admin, async (req, res) => {
+  try {
+    const matchId = Number(req.params.id);
+    const { score_home, score_away, match_date, duration_minutes } = req.body || {};
+
+    const result = await pool.query(
+      `
+      UPDATE matches
+      SET
+        score_home = COALESCE($1, score_home),
+        score_away = COALESCE($2, score_away),
+        match_date = COALESCE($3, match_date),
+        duration_minutes = COALESCE($4, duration_minutes)
+      WHERE match_id = $5
+      RETURNING *;
+      `,
+      [
+        score_home === "" || score_home == null ? null : Number(score_home),
+        score_away === "" || score_away == null ? null : Number(score_away),
+        match_date || null,
+        duration_minutes === "" || duration_minutes == null ? null : Number(duration_minutes),
+        matchId,
+      ]
+    );
+
+    if (!result.rows.length) {
+      return res.status(404).json({ error: "Match not found" });
+    }
+
+    res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

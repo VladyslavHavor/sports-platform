@@ -10,7 +10,7 @@ const tournamentsRoutes = require("./routes/tournaments");
 const authRoutes = require("./routes/auth");
 const favoritesRoutes = require("./routes/favorites");
 const sportsRoutes = require("./routes/sports");
-
+const teamsRoutes = require("./routes/teams");
 const app = express();
 
 app.use(cors());
@@ -33,7 +33,7 @@ app.use("/matches", matchesRoutes);
 app.use("/players", playersRoutes);
 app.use("/tournaments", tournamentsRoutes);
 app.use("/sports", sportsRoutes);
-
+app.use("/teams", teamsRoutes);
 
 app.use((req, res) => res.status(404).json({ error: "Route not found" }));
 

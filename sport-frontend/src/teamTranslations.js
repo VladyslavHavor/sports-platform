@@ -79,16 +79,16 @@ export const TEAM_TRANSLATIONS_UA = {
   "Torino": "Торіно",
   "Udinese": "Удінезе",
   "Venezia": "Венеція",
-  "Verona": "Верона",
+  "Hellas Verona": "Верона",
 
   // Bundesliga
-  "Bayern Munich": "Баварія",
+  "Bayern München": "Баварія",
   "Bayer Leverkusen": "Баєр Леверкузен",
   "Borussia Dortmund": "Боруссія Дортмунд",
-  "Borussia Monchengladbach": "Боруссія Менхенгладбах",
+  "Borussia Mönchengladbach": "Боруссія Менхенгладбах",
   "Eintracht Frankfurt": "Айнтрахт Франкфурт",
   "FC Augsburg": "Аугсбург",
-  "FC Heidenheim": "Гайденгайм",
+  "1. FC Heidenheim": "Гайденгайм",
   "FC Koln": "Кельн",
   "SC Freiburg": "Фрайбург",
   "FSV Mainz 05": "Майнц",
@@ -106,10 +106,10 @@ export const TEAM_TRANSLATIONS_UA = {
   // Ligue 1
   "Angers": "Анже",
   "Auxerre": "Осер",
-  "Brest": "Брест",
+  "Stade Brestois 29": "Брест",
   "Clermont Foot": "Клермон",
   "Lens": "Ланс",
-  "LE Havre": "Гавр",
+  "Le Havre": "Гавр",
   "Lille": "Лілль",
   "Lorient": "Лор’ян",
   "Lyon": "Ліон",
@@ -136,11 +136,11 @@ export const TEAM_TRANSLATIONS_UA = {
   "Vorskla Poltava": "Ворскла Полтава",
   "Oleksandria": "Олександрія",
   "Polessya": "Полісся",
-  "Rukh Vynnyky": "Рух Львів",
+  "Ruh Lviv": "Рух Львів",
   "Chornomorets": "Чорноморець",
   "Kolos Kovalivka": "Колос Ковалівка",
   "Obolon-Brovar": "Оболонь",
-  "Obolon Kyiv": "Оболонь Київ",
+  "Obolon'-Brovar": "Оболонь Київ",
   "LNZ Cherkasy": "ЛНЗ Черкаси",
   "Minai": "Минай",
   "Veres Rivne": "Верес Рівне",
@@ -149,7 +149,8 @@ export const TEAM_TRANSLATIONS_UA = {
   "Karpaty Lviv": "Карпати Львів",
   "Livyi Bereh": "Лівий Берег",
   "Inhulets": "Інгулець",
-
+  "Epitsentr Dunayivtsi": "Епіцентр",
+  
   // Demo sports
   "Lakers": "Лейкерс",
   "Warriors": "Ворріорз",
@@ -186,6 +187,97 @@ export const TEAM_TRANSLATIONS_UA = {
   "MOUZ": "MOUZ",
   "Team Spirit": "Team Spirit",
 };
+
+export const TOURNAMENT_TRANSLATIONS_UA = {
+  // Football
+  "Premier League": "Прем'єр-ліга Англії",
+  "Ligue 1": "Ліга 1",
+  "Bundesliga": "Бундесліга",
+  "Serie A": "Серія А",
+  "La Liga": "Ла Ліга",
+  "Ukrainian Premier League": "Українська Прем'єр-ліга",
+
+  "Austrian Bundesliga": "Австрійська Бундесліга",
+  "Belgian Pro League": "Бельгійська Про-ліга",
+  "Danish Superliga": "Данська Суперліга",
+  "Eredivisie": "Ередивізі",
+  "MLS": "МЛС",
+  "Primeira Liga": "Прімейра-ліга",
+  "Saudi Pro League": "Саудівська Про-ліга",
+  "Scottish Premiership": "Шотландський Прем'єршип",
+  "Swiss Super League": "Швейцарська Суперліга",
+  "Turkish Super Lig": "Турецька Суперліга",
+
+  // Basketball
+  "NBA Demo League": "НБА",
+  "EuroLeague": "Євроліга",
+  "ABA League": "Адріатична ліга",
+  "Spanish Liga ACB": "Ліга ACB",
+  "Turkish BSL": "Турецька баскетбольна ліга",
+  "Lega Basket Serie A": "Серія А (баскетбол)",
+  "LNB Pro A": "Про А Франції",
+  "BBL Germany": "Бундесліга (баскетбол)",
+  "Greek Basket League": "Грецька баскетбольна ліга",
+  "NCAA": "NCAA",
+
+  // Esports
+  "BLAST Premier": "BLAST Premier",
+  "ESL Pro League": "ESL Pro League",
+  "IEM Katowice": "IEM Katowice",
+  "IEM Cologne": "IEM Cologne",
+  "PGL Major": "PGL Major",
+  "Perfect World Major": "Perfect World Major",
+  "Thunderpick World Championship": "Thunderpick World Championship",
+  "YaLLa Compass": "YaLLa Compass",
+  "CCT Online Finals": "CCT Online Finals",
+  "Skyesports Championship": "Skyesports Championship",
+  "ESL Challenger League": "ESL Challenger League",
+  "DreamHack Open": "DreamHack Open",
+  "Gamers8": "Gamers8",
+
+  // Hockey
+  "NHL Demo League": "НХЛ",
+  "IIHF World Championship": "Чемпіонат світу IIHF",
+  "Champions Hockey League": "Ліга чемпіонів з хокею",
+  "Swedish Hockey League": "Шведська хокейна ліга",
+  "Liiga Finland": "Ліга Фінляндії",
+  "National League Switzerland": "Національна ліга Швейцарії",
+  "Czech Extraliga": "Чеська Екстраліга",
+  "DEL Germany": "Німецька хокейна ліга",
+  "AHL": "Американська хокейна ліга",
+
+  // Volleyball
+  "Volleyball Nations League": "Ліга націй з волейболу",
+  "CEV Champions League": "Ліга чемпіонів CEV",
+  "PlusLiga Poland": "ПлюсЛіга Польщі",
+  "Italian SuperLega": "Італійська Суперліга",
+  "Turkish Volleyball League": "Турецька волейбольна ліга",
+  "French Ligue A": "Французька Ліга А",
+  "German Volleyball Bundesliga": "Німецька Бундесліга",
+  "Ukrainian Super League": "Суперліга України",
+  "FIVB Club World Championship": "Клубний чемпіонат світу",
+  "CEV Cup": "Кубок CEV",
+"Volleyball Super League": "Cуперліга з Волейболу",
+  // Tennis
+  "Australian Open": "Відкритий чемпіонат Австралії",
+  "Roland Garros": "Ролан Гаррос",
+  "Wimbledon": "Вімблдон",
+  "US Open": "US Open",
+  "ATP Finals": "Підсумковий турнір ATP",
+  "ATP Masters 1000": "ATP Masters 1000",
+  "ATP 500 Series": "ATP 500",
+  "ATP 250 Series": "ATP 250",
+  "Davis Cup": "Кубок Девіса",
+  "Laver Cup": "Кубок Лейвера",
+  "onlyFavorites": "Улюблені",
+  "Show All": "Всі матчі,",
+  "Away Team": "Виїзна команда",
+};
+
+export function tournamentName(name, lang = "ua") {
+  if (lang !== "ua") return name;
+  return TOURNAMENT_TRANSLATIONS_UA[name] || name;
+}
 
 export function teamName(name, lang = "ua") {
   if (lang !== "ua") return name;

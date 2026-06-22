@@ -35,7 +35,45 @@ export const dict = {
     today: "Сьогодні",
     reset: "Скинути",
     allMatches: "Усі матчі",
+matches: {
+  ua: "Матчів",
+  en: "Matches",
+},
 
+wins: {
+  ua: "Перемог",
+  en: "Wins",
+},
+
+draws: {
+  ua: "Нічиїх",
+  en: "Draws",
+},
+
+losses: {
+  ua: "Поразок",
+  en: "Losses",
+},
+
+goalsScored: {
+  ua: "Голів забито",
+  en: "Goals Scored",
+},
+
+goalsConceded: {
+  ua: "Голів пропущено",
+  en: "Goals Conceded",
+},
+
+last5Matches: {
+  ua: "Останні 5 матчів",
+  en: "Last 5 Matches",
+},
+
+recentMatches: {
+  ua: "Останні матчі",
+  en: "Recent Matches",
+},
     // common
     viewStandings: "Таблиця",
     routeNotFound: "Маршрут не знайдено",
@@ -66,7 +104,7 @@ searchPlaceholder: "Searching for a team or tournament...",
     today: "Today",
     reset: "Reset",
     allMatches: "All matches",
-  football: "Football",
+    football: "Football",
     basketball: "Basketball",
     esports: "Esports",
     hockey: "Hockey",

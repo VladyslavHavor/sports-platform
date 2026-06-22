@@ -10,6 +10,8 @@ import MatchEventsPage from "./pages/MatchEventsPage";
 import StandingsPage from "./pages/StandingsPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import TeamPage from "./pages/TeamPage";
+import ProfilePage from "./pages/ProfilePage";
 
 import { getTournaments, getSports } from "./api";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
@@ -59,10 +61,6 @@ function handleSelectSport(id) {
   setSelectedLeagueId(null);
   navigate("/");
 }
-function handleSelectLeague(id) {
-  setSelectedLeagueId(id);
-  navigate("/");
-}
   return (
     <div className="appLayout">
       <TopBar
@@ -81,17 +79,12 @@ function handleSelectLeague(id) {
 
         <div className="content">
           {canAdmin && (
-            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
-              <label className="btn" style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <input
-                  type="checkbox"
-                  checked={adminMode}
-                  onChange={(e) => setAdminMode(e.target.checked)}
-                />
-                Admin mode
-              </label>
-            </div>
-          )}
+  <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
+    <div className="adminModeBadge">
+      🛠️ ADMIN MODE ENABLED
+    </div>
+  </div>
+)}
 
           <Routes>
             <Route
@@ -103,6 +96,7 @@ function handleSelectLeague(id) {
               element={<MatchesPage selectedSportId={selectedSportId} selectedLeagueId={selectedLeagueId} />}
             />
             <Route path="/matches/:id" element={<MatchEventsPage adminMode={adminMode} />} />
+            <Route path="/teams/:id" element={<TeamPage />} />
             <Route
   path="/tournaments/:id/standings"
   element={<StandingsPage tournaments={tournaments} />}
@@ -110,7 +104,7 @@ function handleSelectLeague(id) {
 
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>

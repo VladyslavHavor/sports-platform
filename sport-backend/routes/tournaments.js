@@ -96,15 +96,11 @@ router.get("/:id/standings", async (req, res) => {
         GROUP BY team_id
       ),
 
-      season_teams AS (
-        SELECT DISTINCT home_team_id AS team_id
-        FROM finished_matches
-
-        UNION
-
-        SELECT DISTINCT away_team_id AS team_id
-        FROM finished_matches
-      )
+     season_teams AS (
+  SELECT team_id
+  FROM teams
+  WHERE tournament_id = $1
+)
 
       SELECT
         tm.team_id,
@@ -124,10 +120,11 @@ router.get("/:id/standings", async (req, res) => {
       LEFT JOIN agg a ON a.team_id = tm.team_id
 
       WHERE
-        CASE
-          WHEN tm.sport_id = 1 THEN COALESCE(a.played, 0) >= 5
-          ELSE COALESCE(a.played, 0) > 0
-        END
+  CASE
+    WHEN tm.sport_id = 1 AND $2 = 2025 THEN COALESCE(a.played, 0) >= 0
+    WHEN tm.sport_id = 1 THEN COALESCE(a.played, 0) >= 5
+    ELSE COALESCE(a.played, 0) > 0
+  END
 
       ORDER BY
         points DESC,

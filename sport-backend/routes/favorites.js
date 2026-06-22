@@ -6,14 +6,23 @@ const auth = require("../middleware/auth");
 // GET /favorites -> список team_id
 router.get("/", auth, async (req, res) => {
   try {
-    const userId = req.user.user_id;
-
     const { rows } = await pool.query(
-      `SELECT team_id FROM user_favorites WHERE user_id = $1 ORDER BY team_id`,
-      [userId]
+      `
+      SELECT
+        t.team_id,
+        t.name,
+        t.logo,
+        tr.name AS tournament
+      FROM user_favorites f
+      JOIN teams t ON t.team_id = f.team_id
+      LEFT JOIN tournaments tr ON tr.tournament_id = t.tournament_id
+      WHERE f.user_id = $1
+      ORDER BY t.name;
+      `,
+      [req.user.user_id]
     );
 
-    res.json(rows.map((r) => r.team_id));
+    res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

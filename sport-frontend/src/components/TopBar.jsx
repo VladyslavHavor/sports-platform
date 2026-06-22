@@ -31,12 +31,16 @@ export default function TopBar({ sports = [], selectedSportId, onSelectSport }) 
   return (
     <div className="topbar">
       {/* LEFT: brand */}
-      <Link to="/" className="brandLink">
-        <div className="brand">
-          <img src={logo} alt="Fastscore logo" className="brandLogo" />
-          <span className="brandText">FASTSCORE</span>
-        </div>
-      </Link>
+      <Link
+  to="/"
+  className="brandLink"
+  onClick={() => window.location.href = "/"}
+>
+  <div className="brand">
+    <img src={logo} alt="Fastscore logo" className="brandLogo" />
+    <span className="brandText">FASTSCORE</span>
+  </div>
+</Link>
 
       {/* MIDDLE: sports tabs */}
       {sports?.length ? (
@@ -90,19 +94,25 @@ export default function TopBar({ sports = [], selectedSportId, onSelectSport }) 
 
   {user ? (
     <>
-      <div className="muted" style={{ fontSize: 13 }}>
-        {user.username} ({user.role})
-      </div>
+    <Link
+  to="/profile"
+  className={`userBadge ${user.role === "admin" ? "admin" : "user"}`}
+>
+  <span className="userName">{user.username}</span>
+  <span className="userRole">
+    {user.role === "admin" ? "ADMIN" : "USER"}
+  </span>
+</Link>
       <button className="btn" onClick={logout}>
         {t(lang, "logout") || "Logout"}
       </button>
     </>
   ) : (
     <>
-      <Link className="btn" to="/login">
+      <Link className="loginBtn" to="/login">
         {t(lang, "login")}
       </Link>
-      <Link className="btnPrimary btn" to="/register">
+      <Link className="registerBtn" to="/register">
         {t(lang, "register")}
       </Link>
     </>

@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { t } from "../i18n";
 import { useAuth } from "../auth/AuthContext";
+import { tournamentName } from "../teamTranslations";
 
 export default function Sidebar({
   tournaments = [],
@@ -20,7 +21,8 @@ export default function Sidebar({
 
 const shouldNavigateToMatches =
   location.pathname.includes("/tournaments/") ||
-  location.pathname.includes("/matches/");
+  location.pathname.includes("/matches/") ||
+    location.pathname.includes("/teams/");
   function handleAllLeagues() {
     onSelect(null);
 
@@ -58,7 +60,7 @@ if (shouldNavigateToMatches) {
             onClick={() => handleLeagueClick(l.tournament_id)}
           >
             <span className="sideDot" />
-            <span>{l.name}</span>
+           <span>{tournamentName(l.name, lang)}</span>
           </button>
         ))}
       </div>
