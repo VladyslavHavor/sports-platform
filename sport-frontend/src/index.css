@@ -2603,62 +2603,100 @@ tr:hover td{ background: rgba(255,255,255,.04); }
 }
 
 @media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+
   .topbar {
-    flex-wrap: wrap;
-    gap: 10px;
-    padding: 12px;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    padding: 12px !important;
+    position: sticky !important;
+  }
+
+  .brandLink {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .brand {
+    justify-content: center;
+  }
+
+  .brandLogo {
+    width: 58px;
+    height: 58px;
   }
 
   .brandText {
     font-size: 16px;
   }
 
-  .sportsTabs {
+  .sportTabs {
+    position: static !important;
+    transform: none !important;
+    left: auto !important;
     width: 100%;
+    justify-content: flex-start;
     overflow-x: auto;
-    display: flex;
-    gap: 8px;
-    padding-bottom: 6px;
+    padding-bottom: 8px;
   }
 
   .sportTab {
     flex: 0 0 auto;
+    height: 38px;
+    padding: 0 12px;
     white-space: nowrap;
   }
 
-  .layout {
-    display: block;
+  .topbarRight {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap !important;
+    margin-left: 0 !important;
+  }
+
+  .mainArea {
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
   }
 
   .sidebar {
+    position: static;
     width: 100%;
-    max-width: none;
-    margin-bottom: 16px;
+    flex: none;
+    height: auto;
+    max-height: 420px;
   }
 
   .content {
     width: 100%;
-    padding: 12px;
+    padding: 0;
   }
 
-  .matchesSplit {
+  .matchesSplit,
+  .matchesSplit.withPanel,
+  .matchesSplit.noPanel {
     display: block;
   }
 
-  .matchesListCol {
+  .matchesListCol,
+  .matchDetailsPanel {
     width: 100%;
+    max-width: 100%;
   }
 
   .matchDetailsPanel {
-    width: 100%;
-    margin-top: 16px;
     position: static;
+    margin-top: 16px;
   }
 
   .matchRow {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: stretch;
   }
 
   .scoreBubble {
@@ -2667,12 +2705,17 @@ tr:hover td{ background: rgba(255,255,255,.04); }
 
   .chipsRow,
   .filtersRow,
-  .seasonButtons,
-  .statusTabs {
+  .statusTabs,
+  .seasonTabs {
     flex-wrap: wrap;
   }
 
+  .searchRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .searchInput {
-    width: 100%;
+    max-width: 100%;
   }
 }
