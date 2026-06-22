@@ -100,11 +100,11 @@ params.season = season;
     })();
   }, [selectedMatch]);
 
-  useEffect(() => {
-  document.title = selectedLeagueName
-    ? `FastScore — ${selectedLeagueName}`
+useEffect(() => {
+  document.title = selectedLeagueId
+    ? "FastScore — Матчі ліги"
     : "FastScore — Всі матчі";
-}, [selectedLeagueName]);
+}, [selectedLeagueId]);
 
  function isFootballQuick(match) {
   const tournament = String(match?.tournament || "").toLowerCase();
