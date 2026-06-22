@@ -87,6 +87,7 @@ params.season = season;
     }
 
     
+    
     (async () => {
       try {
         setEventsError("");
@@ -98,6 +99,12 @@ params.season = season;
       }
     })();
   }, [selectedMatch]);
+
+  useEffect(() => {
+  document.title = selectedLeagueName
+    ? `FastScore — ${selectedLeagueName}`
+    : "FastScore — Всі матчі";
+}, [selectedLeagueName]);
 
  function isFootballQuick(match) {
   const tournament = String(match?.tournament || "").toLowerCase();
